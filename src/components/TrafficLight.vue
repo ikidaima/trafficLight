@@ -1,17 +1,16 @@
 <template>
   <div class="traffic-light">
-    <lamp 
+    <TrafficLightLamp
       v-for="(light, index) of signal" v-bind:key="index"
       :color="light.color"
-      :isActive="routeColor === light.color"
+      :is-active="routeColor === light.color"
       :timer='timer'
-    >
-    </lamp>
+    />
   </div>
 </template>
 
 <script>
-  import Lamp from './Lamp.vue';
+  import TrafficLightLamp from './TrafficLightLamp.vue';
 
   const KEY_OF_LOCAL_STORAGE = 'stateOfTrafficLight';
   const NUMBER_OF_MILLISECOND_PER_SECOND = 1000;
@@ -21,26 +20,40 @@
 
   export default {
     name: 'TrafficLight',
+
     components: {
-      Lamp
+      TrafficLightLamp
     },
+
+    props: {
+      routeColor: String,
+      signal: {
+        type: Array,
+        required: true
+      }
+    },
+
     data() {
       return {
         timer: 0,
         indexOfSignal: 0,
-        nextIndexOfSignal: 1,
-        increment: 1,
+        isForward: true,
         timerID: 0
       }
     },
-    props: ['routeColor', 'signal'],
+
+    computed: {
+      nextIndexOfSignal: function() {
+        return this.isForward ? this.indexOfSignal + 1 : this.indexOfSignal - 1;
+      }
+    },
+
     watch: {
       timer: function() {
         const state = {
           timer: this.timer,
           indexOfSignal: this.indexOfSignal,
-          nextIndexOfSignal: this.nextIndexOfSignal,
-          increment: this.increment
+          isForward: this.isForward,
         };
 
         sessionStorage.setItem(KEY_OF_LOCAL_STORAGE, JSON.stringify(state));
@@ -53,6 +66,15 @@
         }
       }
     },
+
+    mounted() {
+      this.startApp();
+    },
+
+    beforeDestroy() {
+      clearInterval(this.timerID);
+    },
+
     methods: {
       startApp() {
         const index = this.signal.findIndex(item => item.color === this.routeColor);
@@ -61,13 +83,15 @@
         this.switchSignal(this.indexOfSignal);
         this.startTimer();
       },
+
       switchSignal(nextIndexOfSignal) {
 
         if (this.signal[nextIndexOfSignal].color !== this.routeColor) {
           this.$router.push(this.signal[nextIndexOfSignal].color);
         }
-        
+
       },
+
       initState(index) {
         const lastState = JSON.parse( sessionStorage.getItem(KEY_OF_LOCAL_STORAGE) );
 
@@ -79,10 +103,9 @@
         if (lastState) {
 
           if (index === lastState.indexOfSignal) {
-            this.increment = lastState.increment;
             this.timer = lastState.timer;
-            this.indexOfSignal = lastState.indexOfSignal;
-            this.nextIndexOfSignal = lastState.nextIndexOfSignal;
+            this.indexOfSignal = lastState.indexOfSignal
+            this.isForward = lastState.isForward;
             return;
           }
 
@@ -90,31 +113,24 @@
 
         this.updateState(index);
       },
-      updateState(index) {
-        const isIncrementPositive = this.increment > 0;
-        const isFirstIndex = index === 0;
-        const isLastIndex = index === this.signal.length - 1;
 
-        if ( (isLastIndex && isIncrementPositive) || (isFirstIndex && !isIncrementPositive) ) {
-          this.increment = -this.increment;
+      updateState(index) {
+        const isExtremeElement = index === 0 || index === this.signal.length - 1;
+
+        if (isExtremeElement) {
+          this.isForward = !this.isForward;
         }
 
         this.indexOfSignal = index;
-        this.nextIndexOfSignal = index + this.increment;
         this.timer = this.signal[index].timer;
 
       },
+
       startTimer() {
         this.timerID = setInterval(() => {
           this.timer -= DECREMENT_OF_TIMER;
         }, NUMBER_OF_MILLISECOND_PER_SECOND)
       }
-    },
-    mounted() {
-      this.startApp();
-    },
-    beforeDestroy() {
-      clearInterval(this.timerID);
     }
   }
 </script>

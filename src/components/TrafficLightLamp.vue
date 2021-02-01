@@ -7,14 +7,19 @@
       timer < 3 && isActive ? 'splash' : ''
     ]"
   >
-  <p v-if="isActive">{{timer}}</p>
+    <p v-if="isActive">{{timer}}</p>
   </div>
 </template>
 
 <script>
   export default {
-    name: 'Lamp',
-    props: ['color', 'isActive', 'timer']
+    name: 'TrafficLightLamp',
+    
+    props: {
+      color: String,
+      isActive: Boolean,
+      timer: Number
+    }
   }
 </script>
 

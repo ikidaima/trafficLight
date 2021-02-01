@@ -28,7 +28,7 @@ const plugins = [
 module.exports = {
   context: path.resolve(__dirname, `src`),
   mode: `development`,
-  entry: `./js/index.js`,
+  entry: `./index.js`,
   output: {
     filename: `./js/${filename('js')}`,
     path: path.resolve(__dirname, `dist`),

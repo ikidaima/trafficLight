@@ -1,10 +1,18 @@
 <template>
-  <div class="app" id="app">
-    <router-view :signal="signal"></router-view>
+  <div
+    id="app"
+    class="app"
+  >
+    <TheHeader />
+    <main class="main">
+      <router-view :signal="signal" />
+    </main>
   </div>
 </template>
 
 <script>
+  import TheHeader from './components/layout/AppHeader.vue';
+
   const SIGNAL = [
     {
       color: 'red',
@@ -22,6 +30,11 @@
 
   export default {
     name: 'App',
+
+    components: {
+      TheHeader
+    },
+
     data() {
       return {
         signal: SIGNAL
@@ -32,11 +45,14 @@
 
 <style scoped>
   .app {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     height: 100vh;
     margin: 0;
     padding: 0;
+  }
+
+  .main{
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 </style>
